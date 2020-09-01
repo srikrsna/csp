@@ -75,7 +75,7 @@ func (c *CSP) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.H
 	}
 
 	rec := caddyhttp.NewResponseRecorder(w, nil, func(status int, header http.Header) bool {
-		return header.Get("Content-type") == "text/html"
+		return strings.HasPrefix(header.Get("Content-type"), "text/html")
 	})
 	if err := next.ServeHTTP(rec, r); err != nil {
 		return err
@@ -143,7 +143,7 @@ type cspWriter struct {
 var _ caddyhttp.HTTPInterfaces = (*cspWriter)(nil)
 
 func (cw *cspWriter) WriteHeader(status int) {
-	if cw.Header().Get("Content-Type") == "text/html" {
+	if strings.HasPrefix(cw.Header().Get("Content-Type"), "text/html") {
 		cw.Header().Set(cw.header, cw.value)
 	}
 
