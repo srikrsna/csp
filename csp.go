@@ -102,6 +102,7 @@ func (c *CSP) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.H
 
 	res := bytes.ReplaceAll(rec.Buffer().Bytes(), []byte(placeholder), nonceBytes)
 
+	w.Header().Set("Content-Length", strconv.Itoa(len(res)))
 	w.WriteHeader(rec.Status())
 	if _, err := w.Write(res); err != nil {
 		return err
