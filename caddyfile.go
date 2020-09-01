@@ -20,6 +20,11 @@ func init() {
 //
 func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error) {
 	t := new(CSP)
+	if err := t.UnmarshalCaddyfile(h.Dispenser); err != nil {
+		return nil, err
+	}
+
+	return t, nil
 	for h.Next() {
 		for h.NextBlock(0) {
 			switch h.Val() {
