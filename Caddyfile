@@ -1,5 +1,10 @@
+{
+    order csp before file_server
+}
+
 :8080 {
   root * ./app
+  file_server
   encode zstd gzip
 @brotli {
     file {path}.br
@@ -12,5 +17,9 @@ header / {
      X-Frame-Options SAMEORIGIN
      Referrer-Policy strict-origin
      X-XSS-Protection "1; mode=block"
+ }
+
+ csp / {
+     template "default-src: none {nonce}"
  }
 }

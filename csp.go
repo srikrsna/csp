@@ -74,7 +74,9 @@ func (c *CSP) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.H
 		return next.ServeHTTP(&cspWriter{ResponseWriterWrapper: &caddyhttp.ResponseWriterWrapper{ResponseWriter: w}, header: header, value: c.Template}, r)
 	}
 
-	rec := caddyhttp.NewResponseRecorder(w, nil, func(status int, header http.Header) bool {
+	buffer := bufPool.Get().(*bytes.Buffer)
+	defer bufPool.Put(buffer)
+	rec := caddyhttp.NewResponseRecorder(w, buffer, func(status int, header http.Header) bool {
 		return strings.HasPrefix(header.Get("Content-type"), "text/html")
 	})
 	if err := next.ServeHTTP(rec, r); err != nil {
@@ -153,6 +155,11 @@ func (cw *cspWriter) WriteHeader(status int) {
 var (
 	randPool  = newBytePool(16)
 	noncePool = newBytePool(22) // base64.RawStdEncoding.EncodedLen(16)
+	bufPool   = sync.Pool{
+		New: func() interface{} {
+			return new(bytes.Buffer)
+		},
+	}
 )
 
 type bytePool struct {
