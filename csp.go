@@ -76,6 +76,8 @@ func (c *CSP) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.H
 
 	buffer := bufPool.Get().(*bytes.Buffer)
 	defer bufPool.Put(buffer)
+	
+	buffer.Reset()
 	rec := caddyhttp.NewResponseRecorder(w, buffer, func(status int, header http.Header) bool {
 		return strings.HasPrefix(header.Get("Content-type"), "text/html")
 	})
