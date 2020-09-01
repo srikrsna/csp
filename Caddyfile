@@ -1,0 +1,16 @@
+:8080 {
+  root * ./app
+  encode zstd gzip
+@brotli {
+    file {path}.br
+}
+header Server Seva
+header / {
+     Server appointy-seva
+     Strict-Transport-Security max-age=2592000;
+     X-Content-Type-Options nosniff
+     X-Frame-Options SAMEORIGIN
+     Referrer-Policy strict-origin
+     X-XSS-Protection "1; mode=block"
+ }
+}
