@@ -5,10 +5,12 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/caddyserver/caddy/v2"
+	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 	"go.uber.org/zap"
 )
@@ -28,6 +30,7 @@ var bufferPool = sync.Pool{
 var (
 	_ caddy.Provisioner           = (*CSP)(nil)
 	_ caddyhttp.MiddlewareHandler = (*CSP)(nil)
+	_ caddyfile.Unmarshaler       = (*CSP)(nil)
 )
 
 type CSP struct {
@@ -102,6 +105,32 @@ func (c *CSP) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.H
 		return err
 	}
 
+	return nil
+}
+
+// UnmarshalCaddyfile implements caddyfile.Unmarshaler. Syntax:
+//
+//     csp <template> [<report_only>]
+//
+func (c *CSP) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+	for d.Next() {
+		if !d.Args(&c.Template) {
+			return d.ArgErr()
+		}
+
+		if d.NextArg() {
+			val, err := strconv.ParseBool(d.Val())
+			if err != nil {
+				return d.SyntaxErr("boolean true or false")
+			}
+
+			c.ReportOnly = val
+		}
+
+		if d.NextArg() {
+			return d.ArgErr()
+		}
+	}
 	return nil
 }
 
